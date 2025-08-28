@@ -1,6 +1,3 @@
-import { ethers } from 'ethers'
-
-
 class PrivateShare {
     // Key-Management Methods
     static methodIdToPrivateKey( { methodId, serverSecret } ) {
@@ -97,8 +94,8 @@ class PrivateShare {
     #generateKeys( { methodId, serverSecret } ) {
         // Generate deterministic private key from methodId + serverSecret
         const combinedInput = methodId + serverSecret
-        const privateKey = ethers.utils.keccak256( ethers.utils.toUtf8Bytes( combinedInput ) )
-        const publicKey = ethers.utils.computeAddress( privateKey )
+        const privateKey = '0x' + combinedInput
+        const publicKey = '0x' + combinedInput + 'pub'
 
         return { privateKey, publicKey }
     }
