@@ -51,7 +51,8 @@ const { txHash } = PrivateShare.registerAddress({
 ```javascript
 // Fetch latest statistics from MCP server
 const { status, messages, data } = PrivateShare.getLatestStats({ 
-    serverUrl: "http://mcp-server:8080", 
+    serverUrl: "http://mcp-server:8080/stats",
+    method: 'POST', 
     header: { 'Authorization': 'Bearer token123' } 
 })
 const { stats, unixFrom, unixTo, dataId } = data
@@ -68,7 +69,8 @@ const { arrayOfTransfers } = PrivateShare.getArrayOfTransfers({
         minimumAmount: '0.01' 
     },
     totalAmount: "10.00",
-    serverMainAddress: "0xServerMainAddress..."
+    serverMainAddress: "0xServerMainAddress...",
+    serverSecret: "secret_from_env"
 })
 ```
 
@@ -102,7 +104,8 @@ const { confirmed, failed, pending } = PrivateShare.waitForConfirmation({
 ```javascript
 // Send "finished" message to MCP server
 const { status, messages } = PrivateShare.sendFinishedResponse({ 
-    serverUrl: "http://mcp-server:8080",
+    serverUrl: "http://mcp-server:8080/finished",
+    method: 'POST',
     header: { 'Authorization': 'Bearer token123' },
     dataId: "1234567890"
 })
@@ -171,7 +174,7 @@ const { status } = PrivateShare.health()
 
 #### Transfer Array Calculation
 ```javascript
-#calculateTransferArray( { stats, distribution, totalAmount, serverMainAddress } ) {
+#calculateTransferArray( { stats, distribution, totalAmount, serverMainAddress, serverSecret } ) {
     // Fair distribution algorithm
     const totalCalls = Object.values( stats ).reduce( ( sum, count ) => sum + count, 0 )
     
@@ -315,7 +318,13 @@ Dashboard integration for authorized users:
 
 #processPaymentCycle( { stats, dataId, mcpServer } ) {
     // 1. Calculate transfers
-    const { arrayOfTransfers } = PrivateShare.getArrayOfTransfers( { stats, distribution, totalAmount, serverMainAddress } )
+    const { arrayOfTransfers } = PrivateShare.getArrayOfTransfers( { 
+        stats, 
+        distribution: { type: 'fair', minimumAmount: process.env.MINIMUM_PAYOUT || '0.01' }, 
+        totalAmount: process.env.PAYOUT_AMOUNT || '10.00', 
+        serverMainAddress: process.env.SERVER_MAIN_ADDRESS,
+        serverSecret: process.env.SERVER_SECRET
+    } )
     
     // 2. Generate and send transaction proof
     const { transactionProof } = PrivateShare.generateRecursiveTransactionProof( { arrayOfTransfers } )
@@ -340,8 +349,8 @@ Dashboard integration for authorized users:
 
 ### Method ID Format (Strictly follow!)
 ```javascript
-// Method-ID-Generierung: routePath + "__" + methodName.toUpperCase()
-// Beispiel: "/privateShare" + "__" + "getAllPrices_dune" → "PRIVATESHARE__GETALLPRICES_DUNE"
+// Method-ID Generation: routePath + "__" + methodName.toUpperCase()
+// Example: "/privateShare" + "__" + "getAllPrices_dune" → "PRIVATESHARE__GETALLPRICES_DUNE"
 
 // Transformation rules:
 // 1. routePath: Remove "/" at beginning, then .toUpperCase()  
@@ -375,9 +384,9 @@ Dashboard integration for authorized users:
 ```javascript
 {
     methodId: "PRIVATESHARE__GETALLPRICES_DUNE",
-    fromAddress: "0xServerMainAddress...",    // Server's Haupt-Wallet
-    toAddress: "0x123...",                    // Generiert aus methodId
-    amount: "4.50"                            // Klartext-Betrag für Proof-Generation
+    fromAddress: "0xServerMainAddress...",    // Server's main wallet
+    toAddress: "0x123...",                    // Generated from methodId
+    amount: "4.50"                            // Plain text amount for proof generation
 }
 ```
 
@@ -385,7 +394,7 @@ Dashboard integration for authorized users:
 ```javascript
 {
     batchProof: "0xproof...",        // eERC-20 ZK-Batch-Proof
-    transfers: [...],                // Array der Transfer-Objects
+    transfers: [...],                // Array of Transfer Objects
     totalAmount: "10.00",            // Total amount
     timestamp: 1705123200,           // Transaction timestamp
     nonce: "unique_nonce_123"        // Replay protection
@@ -399,6 +408,10 @@ Dashboard integration for authorized users:
 SERVER_MAIN_ADDRESS=0xMainServerAddress...
 SERVER_MAIN_PRIVATE_KEY=0xPrivateKeyForMainAddress...
 SERVER_SECRET=secret_for_method_address_generation
+
+# Payment Configuration
+PAYOUT_AMOUNT=10.00
+MINIMUM_PAYOUT=0.01
 
 # MCP Integration  
 MCP_API_TOKEN=bearer_token_for_mcp_servers

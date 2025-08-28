@@ -4,9 +4,9 @@ Core module for eERC-20 operations and MCP server communication.
 
 ## Quick Navigation
 
-- **[=Ë Full Specification](./src/CORE.md)** - Complete API and architecture documentation
-- **[=Ú Main Documentation](https://github.com/a6b8/privateShare)** - Project overview and guides
-- **[= Middleware Module](https://github.com/FlowMCP/privateShare-middleware)** - MCP server integration
+- **[ðŸ“‹ Full Specification](./src/CORE.md)** - Complete API and architecture documentation
+- **[ðŸ“š Main Documentation](https://github.com/a6b8/privateShare)** - Project overview and guides
+- **[ðŸ”Œ Middleware Module](https://github.com/FlowMCP/privateShare-mcp-middleware)** - MCP server integration
 
 ## Key Documentation Links
 
