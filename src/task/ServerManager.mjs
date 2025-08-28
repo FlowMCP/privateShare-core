@@ -1,8 +1,9 @@
-import express from 'express'
-
-
 class ServerManager {
-    static health() { console.log('ServerManager is healthy') }
+    static health() { 
+        console.log('ServerManager is healthy')
+        
+        return { status: true }
+    }
 }
 
 
